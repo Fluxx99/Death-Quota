@@ -1,0 +1,26 @@
+# Gradle
+.gradle/
+build/
+bin/
+tmp/
+out/
+classes/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ / VS Code
+.idea/
+*.iml
+.vscode/
+
+# Fabric
+run/
+server-run/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+.fake
