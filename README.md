@@ -2,9 +2,6 @@
 
 Death Quota is a lightweight Fabric server-side mod that enforces a hard limit on player deaths before automatically moving them into spectator mode. The mod is designed for challenge SMPs and PvE runs where you want the entire server to play with a fixed pool of lives without requiring client installs. Built and tested on 1.21.1, 1.21.5, and 1.21.10, declared compatible with all 1.21.x patch releases.
 
-## 2.0.0 Update
-Fixed not working in singleplayer and added cross version compatibility 1.21.x.
-
 ## Features
 - Tracks every player's deaths server-side and locks them once they run out of lives.
 - Default limit is three lives, but it can be increased or decreased live through commands.
@@ -29,6 +26,14 @@ All commands live under `/deathquota`:
 - Persistent data is stored in the world's `data/death_quota` folder. Removing those files wipes every player's state.
 - The max lives setting persists across restarts via `DeathQuotaConfig`.
 _note: this mod currently does not have a dedicated config file in configs folder_
+
+## VERSION HISTORY
+## 1.0.0
+Initial release
+## 2.0.0 Update
+Fixed not working in singleplayer
+Added cross version compatibility 1.21.x. 
+Added /deathquota deathmsg <true|false>
 
 ## License
 Released under the MIT License. See `LICENSE` for the full text.
