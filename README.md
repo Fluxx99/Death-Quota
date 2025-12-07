@@ -29,11 +29,11 @@ _note: this mod currently does not have a dedicated config file in configs folde
 
 ## VERSION HISTORY
 ## 1.0.0
-Initial release
+- Initial release
 ## 2.0.0 Update
-Fixed not working in singleplayer
-Added cross version compatibility 1.21.x. 
-Added /deathquota deathmsg <true|false>
+- Fixed not working in singleplayer
+- Added cross version compatibility 1.21.x. 
+- Added /deathquota deathmsg <true|false>
 
 ## License
 Released under the MIT License. See `LICENSE` for the full text.
