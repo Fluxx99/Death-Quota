@@ -3,6 +3,7 @@ package net.deathquota.mod.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
@@ -25,22 +26,26 @@ public final class DeathQuotaCommands {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         dispatcher.register(CommandManager.literal("deathquota")
-                .executes(DeathQuotaCommands::selfInfo)
-                .then(CommandManager.literal("info")
-                        .requires(source -> source.hasPermissionLevel(2))
-                        .then(CommandManager.argument("target", player())
-                                .executes(ctx -> infoAbout(ctx, getPlayer(ctx, "target")))))
-                .then(CommandManager.literal("reset")
-                        .requires(source -> source.hasPermissionLevel(2))
-                        .then(CommandManager.argument("target", player())
-                        .executes(ctx -> resetTarget(ctx, getPlayer(ctx, "target")))))
-                .then(CommandManager.literal("resetall")
-                    .requires(source -> source.hasPermissionLevel(2))
-                    .executes(DeathQuotaCommands::resetAllPlayers))
-                .then(CommandManager.literal("setmax")
-                    .requires(source -> source.hasPermissionLevel(2))
-                    .then(CommandManager.argument("value", integer(1, 99))
-                        .executes(ctx -> setMaxLives(ctx, getInteger(ctx, "value"))))));
+            .executes(DeathQuotaCommands::selfInfo)
+            .then(CommandManager.literal("info")
+                .requires(source -> source.hasPermissionLevel(2))
+                .then(CommandManager.argument("target", player())
+                    .executes(ctx -> infoAbout(ctx, getPlayer(ctx, "target")))))
+            .then(CommandManager.literal("deathmsg")
+                .requires(source -> source.hasPermissionLevel(2))
+                .then(CommandManager.argument("enabled", BoolArgumentType.bool())
+                    .executes(ctx -> setDeathMessageForAll(ctx, BoolArgumentType.getBool(ctx, "enabled")))))
+            .then(CommandManager.literal("reset")
+                .requires(source -> source.hasPermissionLevel(2))
+                .then(CommandManager.argument("target", player())
+                    .executes(ctx -> resetTarget(ctx, getPlayer(ctx, "target")))))
+            .then(CommandManager.literal("resetall")
+                .requires(source -> source.hasPermissionLevel(2))
+                .executes(DeathQuotaCommands::resetAllPlayers))
+            .then(CommandManager.literal("setmax")
+                .requires(source -> source.hasPermissionLevel(2))
+                .then(CommandManager.argument("value", integer(1, 99))
+                    .executes(ctx -> setMaxLives(ctx, getInteger(ctx, "value"))))));
     }
 
     private static int selfInfo(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
@@ -72,11 +77,26 @@ public final class DeathQuotaCommands {
         return affected;
     }
 
+    private static int setDeathMessageForAll(CommandContext<ServerCommandSource> ctx, boolean enabled) {
+        MinecraftServer server = ctx.getSource().getServer();
+        DeathQuotaConfig config = DeathQuotaConfig.get(server);
+        config.setShowDeathLocationMessages(enabled);
+        // Force immediate save to avoid singleplayer caching issues
+        server.getOverworld().getPersistentStateManager().save();
+        Text feedback = Text.literal("Death location messages are now " + (enabled ? "enabled" : "disabled") + " globally.");
+        ctx.getSource().sendFeedback(() -> feedback, true);
+        server.getPlayerManager().getPlayerList()
+                .forEach(player -> player.sendMessage(Text.literal("[Death Quota] Death location messages are now " + (enabled ? "enabled" : "disabled") + "."), false));
+        return enabled ? 1 : 0;
+    }
+
     private static int setMaxLives(CommandContext<ServerCommandSource> ctx, int value) {
         ServerCommandSource source = ctx.getSource();
         MinecraftServer server = source.getServer();
         DeathQuotaConfig config = DeathQuotaConfig.get(server);
         config.setMaxLives(value);
+        // Force immediate save to avoid singleplayer caching issues
+        server.getOverworld().getPersistentStateManager().save();
         int changes = DeathQuotaState.get(server).reconcileLocks(config.getMaxLives());
         server.getPlayerManager().getPlayerList().forEach(DeathQuotaManager::applyPostRespawnState);
         Text feedback = Text.literal("Set max lives to " + config.getMaxLives() + ". Adjusted " + changes + " stored record(s).");

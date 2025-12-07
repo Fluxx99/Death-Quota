@@ -24,3 +24,6 @@ server-run/
 Thumbs.db
 
 .fake
+
+# Misc
+.github/

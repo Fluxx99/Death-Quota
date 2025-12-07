@@ -6,8 +6,11 @@
   "description": "Server-side Fabric mod that enforces a death quota before forcing players into spectator mode.",
   "authors": ["Bernardo"],
   "license": "MIT",
-  "environment": "server",
+  "environment": "*",
   "entrypoints": {
+    "main": [
+      "net.deathquota.mod.DeathQuotaMod"
+    ],
     "server": [
       "net.deathquota.mod.DeathQuotaMod"
     ]
@@ -18,7 +21,7 @@
   "depends": {
     "fabricloader": ">=0.16.9",
     "fabric": "*",
-    "minecraft": "1.21.5",
+    "minecraft": ">=1.21 <=1.21.11",
     "java": ">=21"
   }
 }

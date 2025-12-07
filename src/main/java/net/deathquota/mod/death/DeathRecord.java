@@ -3,6 +3,7 @@ package net.deathquota.mod.death;
 import com.mojang.serialization.Codec;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
+import net.deathquota.mod.util.NbtCompat;
 
 import java.util.Optional;
 
@@ -106,14 +107,15 @@ public final class DeathRecord {
 
     public static DeathRecord fromNbt(NbtCompound nbt) {
         DeathRecord record = new DeathRecord();
-        record.deathCount = nbt.getInt("deaths").orElse(0);
-        record.spectatorLocked = nbt.getBoolean("locked").orElse(false);
-        nbt.getLong("pos").ifPresent(value -> record.lastDeathPos = BlockPos.fromLong(value));
-        nbt.getString("dimension").ifPresent(value -> record.lastDeathDimension = value);
-        nbt.getString("message").ifPresent(value -> record.lastDeathMessage = value);
-        record.lastDeathGameTime = nbt.getLong("time").orElse(0L);
-        record.lastYaw = nbt.getFloat("yaw").orElse(0f);
-        record.lastPitch = nbt.getFloat("pitch").orElse(0f);
+        // Use NbtCompat for cross-version compatibility (1.21.0-1.21.1 vs 1.21.2+)
+        record.deathCount = NbtCompat.getInt(nbt, "deaths", 0);
+        record.spectatorLocked = NbtCompat.getBoolean(nbt, "locked", false);
+        NbtCompat.getBlockPos(nbt, "pos").ifPresent(value -> record.lastDeathPos = value);
+        NbtCompat.getOptionalString(nbt, "dimension").ifPresent(value -> record.lastDeathDimension = value);
+        NbtCompat.getOptionalString(nbt, "message").ifPresent(value -> record.lastDeathMessage = value);
+        record.lastDeathGameTime = NbtCompat.getLong(nbt, "time", 0L);
+        record.lastYaw = NbtCompat.getFloat(nbt, "yaw", 0f);
+        record.lastPitch = NbtCompat.getFloat(nbt, "pitch", 0f);
         return record;
     }
 }
